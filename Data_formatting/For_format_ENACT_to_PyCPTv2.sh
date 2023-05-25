@@ -14,13 +14,13 @@ cdo yearsum tmp.nc $seas.nc
 # Add reftime to day units
 cdo -setreftime,'1981-'$mo1'-17,00:00:00,1day' -setcalendar,proleptic_gregorian $seas.nc out1.nc
 # Remap attributs
-#'''
-# Dont need this if we use cdo to extract data for seasonal quarter
-#ncatted -O -a units,Lon,o,c,'degree_east' tmp.nc
-#ncatted -O -a units,Lat,o,c,'degree_north' tmp.nc
-#ncrename -d Lon,X -v Lon,X tmp.nc
-#ncrename -d Lat,Y -v Lat,Y tmp.nc
-#'''
+'''
+# Don't need this if we use cdo to extract data for seasonal quarter
+ncatted -O -a units,Lon,o,c,'degree_east' tmp.nc
+ncatted -O -a units,Lat,o,c,'degree_north' tmp.nc
+ncrename -d Lon,X -v Lon,X tmp.nc
+ncrename -d Lat,Y -v Lat,Y tmp.nc
+'''
 # To run code line
 cat << EOF > format.R
 #!/usr/bin/Rscript
@@ -34,12 +34,12 @@ library(nat)
 ###########################
 #### Edit this part #######
 
-di_init <- "1981/06/01"
-di_fin <- "2021/06/01"
-d_init <- "1981/07/17"
-d_fin <- "2021/07/17"
-df_init <- "1981/08/31"
-df_fin <- "2021/08/31"
+di_init <- "1981-06-01"
+di_fin <- "2021-06-01"
+d_init <- "1981-07-17"
+d_fin <- "2021-07-17"
+df_init <- "1981-08-31"
+df_fin <- "2021-08-31"
 
 ##########################
 
@@ -98,22 +98,22 @@ EOF
 ./format.R
 # We have rfe_map.nc file with T, Ti and Tf reference time.
 rm format.R
-#'''
-#ncatted -O -a _FillValue,rfe,o,d,NaN rfe_map.nc
-#ncatted -O -a _FillValue,Y,o,d,NaN rfe_map.nc
-#ncatted -O -a _FillValue,X,o,d,NaN rfe_map.nc
-#ncatted -O -a _FillValue,X,o,f,NaN rfe_map.nc
-#ncatted -O -a calendar,T,o,c,proleptic_gregorian rfe_map.nc
-#ncatted -O -a calendar,Ti,o,c,proleptic_gregorian rfe_map.nc
-#ncatted -O -a calendar,Tf,o,c,proleptic_gregorian rfe_map.nc
-#ncatted -O -a nrow,rfe,o,c,387 rfe_map.nc
-#ncatted -O -a ncol,rfe,o,c,267 rfe_map.nc
-#ncatted -O -a missing,rfe,o,c,-999 rfe_map.nc
-#ncatted -O -a row,rfe,o,c,Y rfe_map.nc
-#ncatted -O -a col,rfe,o,c,X rfe_map.nc
-#ncatted -O -a coordinates,rfe,o,c,Tf Ti rfe_map.nc
-#ncatted -O -a field,rfe,o,c,rfe rfe_map.nc
-#'''
+'''
+ncatted -O -a _FillValue,rfe,o,d,NaN rfe_map.nc
+ncatted -O -a _FillValue,Y,o,d,NaN rfe_map.nc
+ncatted -O -a _FillValue,X,o,d,NaN rfe_map.nc
+ncatted -O -a _FillValue,X,o,f,NaN rfe_map.nc
+ncatted -O -a calendar,T,o,c,proleptic_gregorian rfe_map.nc
+ncatted -O -a calendar,Ti,o,c,proleptic_gregorian rfe_map.nc
+ncatted -O -a calendar,Tf,o,c,proleptic_gregorian rfe_map.nc
+ncatted -O -a nrow,rfe,o,c,387 rfe_map.nc
+ncatted -O -a ncol,rfe,o,c,267 rfe_map.nc
+ncatted -O -a missing,rfe,o,c,-999 rfe_map.nc
+ncatted -O -a row,rfe,o,c,Y rfe_map.nc
+ncatted -O -a col,rfe,o,c,X rfe_map.nc
+ncatted -O -a coordinates,rfe,o,c,Tf Ti rfe_map.nc
+ncatted -O -a field,rfe,o,c,rfe rfe_map.nc
+'''
 ncdump -h rfe_map.nc
 cp rfe_map.nc ENACTS-MADAGASCAR.PRCP_$seas.nc
 rm rfe_map.nc out1.nc
