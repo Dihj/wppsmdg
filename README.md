@@ -1,11 +1,11 @@
 # Script for work
-### This repository contain the script that I usefor my work
+### This repository contains the script that I use for my work
 Usually, we need to memorize and keep our scripts somewhere, Github is there for that.
 
 > NB: Part of the scripts come from or recycle from other discussion platforms. 
 
-This repository contain script for: 
+This repository contains scripts for: 
 - Data formatting for seasonal forecasting tools
-* Scripts to run seasonal forecasting on Server
+* Scripts to run seasonal forecasting on the HPC Server
 + Usual scripts
 
