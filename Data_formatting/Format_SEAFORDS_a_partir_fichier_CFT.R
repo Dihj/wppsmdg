@@ -9,8 +9,8 @@ start_time <- Sys.time()
 season <- "SON"  # eg "SON" for 3 month, monthly eg "JAN"
 year <- 2023  ### année atao évaluation
 param <- "TMEAN"   # Choose between "TMEAN" for temperature and "RR" for rainfall
-country <- "BTK"  # Choose your country or region
-rr <- read.csv("Data_TMEAN_BTK_4km_CFT_Format_ENACTSv4.csv", na.strings = "-99.9") # File data in CFT format
+country <- "MAD"  # Choose your country or region
+rr <- read.csv("Data_TMEAN_MAD_4km_CFT_Format_ENACTSv4.csv", na.strings = "-99.9") # File data in CFT format
 resultat <- paste(country,"_",param,"_",season, ".txt",sep = "")  # Name of the output result in SEAFORDS format "Country-param-season"
 
 ########################################################################
