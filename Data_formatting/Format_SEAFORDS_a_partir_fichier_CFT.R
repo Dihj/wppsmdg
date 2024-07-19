@@ -8,10 +8,10 @@ rm(list = ls())
 start_time <- Sys.time()
 #####                           ONLY EDIT HERE                              ######
 # Define parameters
-season <- "JJA"  # e.g., "SON" for 3 months, monthly e.g., "JAN"
+season <- "NDJ"  # e.g., "SON" for 3 months, monthly e.g., "JAN"
 year <- 2021  # Year for verification, the last year
-param <- "rainfall"  # Choose between "rainfall" or "temperature" for temperature and "RR" for rainfall
-param_name <- "PRCTOT"
+param <- "rainfall"  # Choose between "rainfall" or "temperature" for temperature and "rainfall" for rainfall
+param_name <- "PRCTOT" # Write the name of the parameter that you want, PREC, RR, PRCTOT ... TMAX, TX, TMIN, TN ....
 country <- "MADAG"  # Choose your country or region
 
 # Read data
@@ -66,7 +66,8 @@ if (season %in% names(month_indices)) {
 # Special cases for multi-year seasons
 if (season %in% c("NDJ", "DJF", "ONDJFMA")) {
   fn <- "tmp.csv"
-  file.remove(fn)
+  if (file.exists(fn)) {file.remove(fn)}
+  #file.remove(fn)
   unique_ids <- unique(rr$ID)
   
   for (i in unique_ids) {
@@ -121,7 +122,7 @@ dd <- rbind(tro2, trobe2)
 write.table(dd, resultat, row.names = FALSE, col.names = FALSE, sep = '\t', quote = FALSE , na = "-99.9")
 
 # Clean up temporary files
-file.remove("tt2.csv", "tt.csv")
+file.remove("tt2.csv", "tt.csv", "tmp.csv")
 
 end_time <- Sys.time()
 print(end_time - start_time)
