@@ -6,28 +6,27 @@
 
 rm(list = ls())
 start_time <- Sys.time()
+##################################################################################
 #####                           ONLY EDIT HERE                              ######
 # Define parameters
 season <- "NDJ"  # e.g., "SON" for 3 months, monthly e.g., "JAN"
-year <- 2021  # Year for verification, the last year
+year <- 2022  # Year for verification, the last year
 param <- "rainfall"  # Choose between "rainfall" or "temperature" for temperature and "rainfall" for rainfall
 param_name <- "PRCTOT" # Write the name of the parameter that you want, PREC, RR, PRCTOT ... TMAX, TX, TMIN, TN ....
 country <- "MADAG"  # Choose your country or region
 
 # Read data
-file_path <- "RR_CFT_EnactV4_1981-2021.csv"   # Data must be a CFT Format
-#file_path <- paste0("Data_", param_name, "_", country, "_4km_CFT_Format_ENACTSv4.csv")
+file_path <- "RR_CFT_EnactV4_1981-2022.csv"   # Data must be a CFT Format
 missing_value <- "-99"  # Take care of missing value
 ###################################################################################
 
 rr <- read.csv(file_path, na.strings = missing_value)
-# Define output file name
+# Output file name already idem as required by SEAFORDS
 resultat <- paste0(country, "_", param_name, "_", season, ".txt")
 
-# Remove temporary files if they exist
+# Remove temporary files if they exist, maybe need some improvement here
 if (file.exists("tt2.csv")) {file.remove("tt2.csv")}
 if (file.exists("tt.csv")) {file.remove("tt.csv")}
-#file.remove("tt2.csv", "tt.csv")
 
 # Extract coordinates
 coord <- rr[, 1:4]
@@ -44,11 +43,17 @@ season_indices <- list(
   NDJ = c(15, 16, 5), DJF = c(16, 5, 6), ONDJFMA = c(14, 15, 16, 5, 6, 7, 8)
 )
 
-# Helper function to process season data
+# Helper function to process season data, need this if there are missing values
 process_season <- function(rr, indices, func, coord) {
   rrsea <- rr[, indices]
-  mm <- apply(rrsea, 1, func)
-  mm <- round(mm,2)
+  mm <- apply(rrsea, 1, function(x) {
+    if (any(is.na(x))) {
+      return(NA)  # Assign NA if any missing value
+    } else {
+      return(func(x))
+    }
+  })
+  mm <- round(mm, 2)
   cbind(coord, mm)
 }
 
@@ -67,7 +72,7 @@ if (season %in% names(month_indices)) {
 if (season %in% c("NDJ", "DJF", "ONDJFMA")) {
   fn <- "tmp.csv"
   if (file.exists(fn)) {file.remove(fn)}
-  #file.remove(fn)
+  
   unique_ids <- unique(rr$ID)
   
   for (i in unique_ids) {
@@ -75,22 +80,26 @@ if (season %in% c("NDJ", "DJF", "ONDJFMA")) {
     for (a in rrs$Year) {
       rrk <- subset(rrs, Year == a)
       rrj <- subset(rrs, Year == ifelse(a == year, a, a + 1))
-      if (param == "rainfall") {
+      
+      # Handle last year (no data for the following year)
+      if (a == year) {
+        mmo <- NA  # Assign NA for the last year
+      } else if (param == "rainfall") {
         mmo <- switch(
-        season,
-        NDJ = round(sum(rrk[, 15], rrk[, 16], rrj[, 5]),2),
-        DJF = round(sum(rrk[, 16], rrj[, 5], rrj[, 6]),2),
-        ONDJFMA = round(sum(rrk[, 14:16], rrj[, 5:8]),2)
-      ) 
+          season,
+          NDJ = if (any(is.na(c(rrk[, 15], rrk[, 16], rrj[, 5])))) NA else round(sum(rrk[, 15], rrk[, 16], rrj[, 5]), 2),
+          DJF = if (any(is.na(c(rrk[, 16], rrj[, 5], rrj[, 6])))) NA else round(sum(rrk[, 16], rrj[, 5], rrj[, 6]), 2),
+          ONDJFMA = if (any(is.na(c(rrk[, 14:16], rrj[, 5:8])))) NA else round(sum(rrk[, 14:16], rrj[, 5:8]), 2)
+        )
       } else if (param == "temperature") {
         mmo <- switch(
-        season,
-        NDJ = round(mean(rrk[, 15], rrk[, 16], rrj[, 5]),2),
-        DJF = round(mean(rrk[, 16], rrj[, 5], rrj[, 6]),2),
-        ONDJFMA = round(mean(rrk[, 14:16], rrj[, 5:8]),2)
-      )
+          season,
+          NDJ = if (any(is.na(c(rrk[, 15], rrk[, 16], rrj[, 5])))) NA else round(mean(rrk[, 15], rrk[, 16], rrj[, 5]), 2),
+          DJF = if (any(is.na(c(rrk[, 16], rrj[, 5], rrj[, 6])))) NA else round(mean(rrk[, 16], rrj[, 5], rrj[, 6]), 2),
+          ONDJFMA = if (any(is.na(c(rrk[, 14:16], rrj[, 5:8])))) NA else round(mean(rrk[, 14:16], rrj[, 5:8]), 2)
+        )
       } else {
-        stop("Invalide parameter combination")
+        stop("Invalid parameter combination")
       }
 
       write(paste(i, a, mmo, sep = ","), fn, append = TRUE)
@@ -122,8 +131,10 @@ dd <- rbind(tro2, trobe2)
 write.table(dd, resultat, row.names = FALSE, col.names = FALSE, sep = '\t', quote = FALSE , na = "-99.9")
 
 # Clean up temporary files
-file.remove("tt2.csv", "tt.csv", "tmp.csv")
-
+#file.remove("tt2.csv", "tt.csv", "tmp.csv")
+if (file.exists("tt2.csv")) {file.remove("tt2.csv")}
+if (file.exists("tt.csv")) {file.remove("tt.csv")}
+if (file.exists("tmp.csv")) {file.remove("tmp.csv")}
 end_time <- Sys.time()
 print(end_time - start_time)
 print("...........Conversion CFT format to SEAFORD format finished..........")
